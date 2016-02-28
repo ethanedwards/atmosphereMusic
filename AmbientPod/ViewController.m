@@ -6,6 +6,12 @@
 //  Copyright (c) 2015 Ethan Edwards. All rights reserved.
 //
 
+
+
+//MEMORY LEAK ASSOCIATED WITH STARTING AND RESTARTING AUDIO
+
+
+
 //Currently this app does not work in the Gulf of Guinea
 
 
@@ -69,8 +75,8 @@ CLLocationCoordinate2D curCoord;
 
 - (void)viewDidLoad {
         [super viewDidLoad];
-    [self.UpdateButton removeFromSuperview];
-    [self.cityName removeFromSuperview];
+    //[self.UpdateButton removeFromSuperview];
+    //[self.cityName removeFromSuperview];
 
     
     active = false;
@@ -96,7 +102,9 @@ CLLocationCoordinate2D curCoord;
     NSLog(@"User's current time in their preference format:%@",currentTime);
     
     [self setVals];
-    
+    [self.rtcmixManager startAudio];
+    NSString *scorePath = [[NSBundle mainBundle] pathForResource:@"setup" ofType:@"sco"];
+    [self.rtcmixManager parseScoreWithFilePath:scorePath];
     
     //NSString *scorePath = [[NSBundle mainBundle] pathForResource:@"loop" ofType:@"sco"];
     //[self.rtcmixManager parseScoreWithFilePath:scorePath];
@@ -167,20 +175,35 @@ CLLocationCoordinate2D curCoord;
 }
 - (IBAction)StartAudio:(id)sender {
     if(!active){
-        [self.rtcmixManager startAudio];
+        //[self.rtcmixManager startAudio];
         loop = 0;
         [self mainLoop];
         [self.StartBut setTitle:@"Stop" forState:UIControlStateNormal];
         active = true;
+        [self resetButton];
     } else{
         [currentTimer invalidate];
         currentTimer = nil;
-        [self.rtcmixManager destroyRTcmix];
+        //[self.rtcmixManager destroyRTcmix];
+        [self.rtcmixManager flushAllScores];
         [self.StartBut setTitle:@"Start" forState:UIControlStateNormal];
         active = false;
+        [self resetButton];
     }
 
 }
+
+-(void) reEnable: (NSTimer *) timer{
+    [self.StartBut setEnabled:true];
+}
+
+-(void) resetButton{
+    [self.StartBut setEnabled:false];
+    NSTimer *buttonTimer = [NSTimer scheduledTimerWithTimeInterval:3.0f target:self selector:@selector(reEnable: ) userInfo: nil repeats:NO];
+    //[buttonTimer fire];
+}
+
+
 
 -(void) setVals{
     
@@ -301,6 +324,7 @@ CLLocationCoordinate2D curCoord;
         float cu;
         float cm;
         float cd;
+        float cv;
         float dg;
         float di;
         float dd;
@@ -308,14 +332,18 @@ CLLocationCoordinate2D curCoord;
         float d2;
         float dvar;
         float dspace;
+        float dv;
         float v;
-        
+        float dr;
         
         chNum = 4;
         dvar = 2;
         dspace = .2;
         v = 1;
         cd = 7.0;
+        cv = 1;
+        dv = 1;
+        dr = 4;
         
         //normal
         if(i == 8){
@@ -328,17 +356,21 @@ CLLocationCoordinate2D curCoord;
                 cu = 70;
                 cm = 5;
                 cd = 0;
+                cv = 1;
                 dg = 8;
                 di = 6;
                 dd = 3;
                 d1 = 70;
                 d2 = 100;
+                dv = .9;
+                dr = 3;
                 v = 1;
                 chNum = 4;
                 dvar = 3;
                 dspace = .05;
                 
             }
+            //few and scattered clouds
             else if (k > 802){
                 cg = 10;
                 ci = 6;
@@ -347,17 +379,23 @@ CLLocationCoordinate2D curCoord;
                 cu = 80;
                 cm = 5;
                 cd = 3;
+                cv = 1;
                 dg = 7;
                 di = 6;
                 dd = 4.5;
                 d1 = 30;
                 d2 = 40;
+                dv = 1;
+                dr = 4;
                 v = 1;
                 chNum = 6;
                 dvar = 4;
                 dspace = .1;
                 
-            } else{
+            }
+            
+            //broken and scattered
+            else{
                 cg = 4;
                 ci = 6;
                 cr = 3;
@@ -365,51 +403,66 @@ CLLocationCoordinate2D curCoord;
                 cu = 70;
                 cm = 3;
                 cd = 10;
+                cv = 1;
                 dg = 7;
                 di = 5;
                 dd = 8;
                 d1 = 60;
                 d2 = 80;
+                dv = 1;
+                dr = 7;
                 v = 2;
                 chNum = 6;
                 dvar = 4;
                 dspace = .15;
             }
-        } else if(i == 5){
+        }
+        //rain
+        else if(i == 5){
             cg = 1;
             ci = .7;
             cr = 10;
             cf = 600;
             cu = 50;
             cm = .6;
+            cv = 1;
             dg = 9;
             di = 6;
             dd = 8;
             d1 = 10;
             d2 = 20;
+            dv = 1;
+            dr = 6;
             v = 3;
             chNum = 4;
             dvar = 2;
             dspace = .2;
             
-        } else if(i == 2){
+        }
+        //thunderstorm
+        else if(i == 2){
             cg = .6;
             ci = .4;
             cr = 10;
             cf = 600;
             cu = 50;
             cm = .3;
-            cd = 4;
+            cd = 5;
+            cv = 1.25;
             dg = 10;
             di = 7;
             dd = 4;
             d1 = 10;
             d2 = 20;
+            dv = 1.25;
+            dr = 7;
             v = 4;
             chNum = 2;
             dvar = 2;
             dspace = .2;
-        } else if(i == 3){
+        }
+        //drizzle
+        else if(i == 3){
             cg = 2;
             ci = 1;
             cr = 10;
@@ -417,17 +470,21 @@ CLLocationCoordinate2D curCoord;
             cu = 50;
             cm = .5;
             cd = 5;
+            cv = 1;
             dg = 9;
             di = 6;
             dd = 8;
             d1 = 10;
             d2 = 20;
+            dv = 1;
+            dr = 5;
             v = 2;
             chNum = 2;
             dvar = 5;
             dspace = .1;
             
         }
+        //snow
         else if(i == 6){
             cg = 8;
             ci = 6;
@@ -435,11 +492,15 @@ CLLocationCoordinate2D curCoord;
             cf = 300;
             cu = 40;
             cm = 4;
+            cd = 3;
+            cv = .7;
             dg = 7;
             di = 5;
             dd = 4;
             d1 = 50;
             d2 = 70;
+            dv = .75;
+            dr = 3;
             v = 1;
             chNum = 5;
             dvar = 4;
@@ -454,22 +515,32 @@ CLLocationCoordinate2D curCoord;
             cf = 500;
             cu = 70;
             cm = 5;
+            cd = 10;
+            cv = 2;
+
             dg = 7;
             di = 5;
             dd = 4;
             d1 = 10;
             d2 = 20;
+            dv = 1.75;
+            dr = 6;
             chNum = 7;
             dvar = 5;
             dspace = .2;
             
-        } else{
+        }
+        //other
+        else{
             cg = 10;
             ci = 6;
             cr = 20;
             cf = 500;
             cu = 70;
             cm = 5;
+            cd = 5;
+            cv = 1;
+
             dg = 7;
             di = 5;
             dd = 4;
@@ -494,256 +565,62 @@ CLLocationCoordinate2D curCoord;
         NSLog(@"int %f", dim);
         NSLog(@"gap %f", dgm);
         
-        NSString *starts = [NSString stringWithFormat: @"chimes=%f\nchimeGap = %f\nchimeInt = %f\nchimeRange = %f\nchimeFreq = %f\nchimeUp = %f\nchimeMin = %f\nchimeDur = %f\ndroneGap = %f\ndroneInt = %f\ndroneDur = %f\ndrone1 = %f\ndrone2 = %f\ndroneSub=%f\ndroneSpace=%f\nvoices = %f", chNum, cg, ci, cr, cf, cu, cm, cd, dg, di, dd, d1, d2, dvar, dspace, v];
+        NSNumber *currentHum = result[@"main"][@"humidity"];
+        float h = [currentHum floatValue]/10;
+        
+        dd = dd + h;
+        NSString *envEnd = [NSString stringWithFormat: @"final = %f", h+16];
+        
+        
+        NSString *starts = [NSString stringWithFormat: @"chimes=%f\nchimeGap = %f\nchimeInt = %f\nchimeRange = %f\nchimeFreq = %f\nchimeUp = %f\nchimeMin = %f\nchimeDur = %f\nchimeAmp = %f\ndroneGap = %f\ndroneInt = %f\ndroneDur = %f\ndrone1 = %f\ndrone2 = %f\ndroneSub=%f\ndroneSpace=%f\ndroneRange = %f\n droneAmp = %f\nvoices = %f", chNum, cg, ci, cr, cf, cu, cm, cd, cv, dg, di, dd, d1, d2, dvar, dspace, dr, dv, v];
         
         
         NSNumber *currentTemp = result[@"main"][@"temp"];
         float k = [currentTemp floatValue];
-        k = 250-k*8;
+        k = 600-k*16;
         NSString *variable = [NSString stringWithFormat: @"droneFreq = %f", k];
-        NSLog(variable);
+//        NSLog(variable);
         self.TempLabel.text = [NSString stringWithFormat: @"%d%@", [currentTemp intValue], @"°C"];
         
         NSNumber *win = result[@"wind"][@"speed"];
         float w = [win floatValue]*25;
-        NSString *wind = [NSString stringWithFormat: @"windamp = %f", w];
-        NSLog(wind);
+        NSString *wind = [NSString stringWithFormat: @"windamp = %f\nwindv = %f", w, w/2];
+//        NSLog(wind);
         self.WindLabel.text = [NSString stringWithFormat: @"%@%.1f%@", @"Wind: ", [win floatValue], @" km/h"];
         
-        NSNumber *currentHum = result[@"main"][@"humidity"];
-        float h = [currentHum floatValue]/10;
-        NSString *range = [NSString stringWithFormat: @"droneRange = %f", h];
-        self.HumLabel.text = [NSString stringWithFormat: @"%@%@%@", @"Hum: ", [currentHum stringValue], @"%"];
+        NSNumber *cloud = result[@"clouds"][@"all"];
+        float c = [cloud floatValue]/200;
+        NSString *clouds = [NSString stringWithFormat: @"cloud = %f", c];
+//        NSLog(clouds);
         
+        NSNumber *pres = result[@"main"][@"pressure"];
+        float p = [pres floatValue];
+        p = 1013-p;
+        if(p<0){
+            p = 0;
+        }
+        p = p/40;
+        NSString *pr = [NSString stringWithFormat: @"Pressure = %f", p];
+//        NSLog(pr);
+        
+
+        //NSString *range = [NSString stringWithFormat: @"droneRange = %f", h];
+        //self.HumLabel.text = [NSString stringWithFormat: @"%@%@%@", @"Hum: ", [currentHum stringValue], @"%"];
+        
+        
+        //NSString *range = [NSString stringWithFormat: @"droneRange = %f", h];
+        self.HumLabel.text = [NSString stringWithFormat: @"%@%@%@", @"Hum: ", [currentHum stringValue], @"%"];
         
         [self.rtcmixManager parseScoreWithNSString:starts];
         [self.rtcmixManager parseScoreWithNSString:variable];
         [self.rtcmixManager parseScoreWithNSString:wind];
-        [self.rtcmixManager parseScoreWithNSString:range];
+        [self.rtcmixManager parseScoreWithNSString: clouds];
+        [self.rtcmixManager parseScoreWithNSString:pr];
+        [self.rtcmixManager parseScoreWithNSString:envEnd];
         NSString *scorePath = [[NSBundle mainBundle] pathForResource:@"loop" ofType:@"sco"];
         [self.rtcmixManager parseScoreWithFilePath:scorePath];
     }];
     } //end else
-    /*
-    [weatherAPI currentWeatherByCityName:city withCallback:^(NSError *error, NSDictionary *result) {
-        if (error) {
-            // handle the error
-            NSLog(@"Error");
-            return;
-        }
-        // The data is ready
-        
-        //Type of weather
-        NSNumber *currentID = result[@"weather"][0][@"id"];
-        int i = [[[currentID stringValue] substringToIndex: 1] intValue];
-        NSLog(@"ID is %d", i);
-        
-        float chNum;
-        float cg;
-        float ci;
-        float cr;
-        float cf;
-        float cu;
-        float cm;
-        float cd;
-        float dg;
-        float di;
-        float dd;
-        float d1;
-        float d2;
-        float dvar;
-        float dspace;
-        float v;
-        
-        
-        chNum = 4;
-        dvar = 2;
-        dspace = .5;
-        v = 1;
-        cd = 7.0;
-        
-        //normal
-        if(i == 8){
-            int k = [currentID intValue];
-            if(k == 800){
-                cg = 10;
-                ci = 6;
-                cr = 3;
-                cf = 600;
-                cu = 70;
-                cm = 5;
-                cd = 0;
-                dg = 8;
-                di = 6;
-                dd = 3;
-                d1 = 70;
-                d2 = 100;
-                v = 1;
-                
-            }
-            else if (k > 802){
-                cg = 10;
-                ci = 6;
-                cr = 6;
-                cf = 600;
-                cu = 80;
-                cm = 5;
-                cd = 3;
-                dg = 7;
-                di = 6;
-                dd = 4.5;
-                d1 = 30;
-                d2 = 40;
-                v = 1;
-                
-            } else{
-                cg = 4;
-                ci = 6;
-                cr = 3;
-                cf = 450;
-                cu = 70;
-                cm = 3;
-                cd = 10;
-                dg = 7;
-                di = 5;
-                dd = 8;
-                d1 = 60;
-                d2 = 80;
-                v = 2;
-                
-            }
-        } else if(i == 5){
-            cg = 1;
-            ci = .7;
-            cr = 10;
-            cf = 600;
-            cu = 50;
-            cm = .6;
-            dg = 9;
-            di = 6;
-            dd = 8;
-            d1 = 10;
-            d2 = 20;
-            v = 3;
-            
-        } else if(i == 2){
-            cg = .6;
-            ci = .4;
-            cr = 10;
-            cf = 600;
-            cu = 50;
-            cm = .3;
-            cd = 4;
-            dg = 10;
-            di = 7;
-            dd = 4;
-            d1 = 10;
-            d2 = 20;
-            v = 4;
-            
-        } else if(i == 3){
-            cg = 2;
-            ci = 1;
-            cr = 10;
-            cf = 600;
-            cu = 50;
-            cm = .5;
-            cd = 5;
-            dg = 9;
-            di = 6;
-            dd = 8;
-            d1 = 10;
-            d2 = 20;
-            v = 2;
-            
-        }
-        else if(i == 6){
-            cg = 8;
-            ci = 6;
-            cr = 5;
-            cf = 300;
-            cu = 40;
-            cm = 4;
-            dg = 7;
-            di = 5;
-            dd = 4;
-            d1 = 50;
-            d2 = 70;
-            v = 1;
-            
-        }
-        //this currently includes both "extreme" and "other" due to not checking the second digit, must be changed
-        else if(i == 9){
-            cg = 10;
-            ci = 6;
-            cr = 20;
-            cf = 500;
-            cu = 70;
-            cm = 5;
-            dg = 7;
-            di = 5;
-            dd = 4;
-            d1 = 10;
-            d2 = 20;
-            
-        } else{
-            cg = 10;
-            ci = 6;
-            cr = 20;
-            cf = 500;
-            cu = 70;
-            cm = 5;
-            dg = 7;
-            di = 5;
-            dd = 4;
-            d1 = 10;
-            d2 = 20;
-        }
-        //chimeGap = 5
-        //chimeInt = .5
-        //chimeRange = 10
-        //chimeFreq = 600
-        //chimeUp = 50
-        
-        //droneGap = 7
-        //droneInt = 5
-        //droneDur = 4
-        //drone1 = 10
-        //drone2 = 20
-        
-        di = dim;
-        dg = dgm;
-        
-        NSLog(@"int %f", dim);
-        NSLog(@"gap %f", dgm);
-        
-        NSString *starts = [NSString stringWithFormat: @"chimes=%f\nchimeGap = %f\nchimeInt = %f\nchimeRange = %f\nchimeFreq = %f\nchimeUp = %f\nchimeMin = %f\nchimeDur = %f\ndroneGap = %f\ndroneInt = %f\ndroneDur = %f\ndrone1 = %f\ndrone2 = %f\ndroneSub=%f\ndroneSpace=%f\nvoices = %f", chNum, cg, ci, cr, cf, cu, cm, cd, dg, di, dd, d1, d2, dvar, dspace, v];
-        
-        
-        NSNumber *currentTemp = result[@"main"][@"temp"];
-        float k = [currentTemp floatValue];
-        k = 250-k*8;
-        NSString *variable = [NSString stringWithFormat: @"droneFreq = %f", k];
-        NSLog(variable);
-        
-        NSNumber *win = result[@"wind"][@"speed"];
-        float w = [win floatValue]*25;
-        NSString *wind = [NSString stringWithFormat: @"windamp = %f", w];
-        NSLog(wind);
-        
-        NSNumber *currentHum = result[@"main"][@"humidity"];
-        float h = [currentHum floatValue]/10;
-        NSString *range = [NSString stringWithFormat: @"droneRange = %f", h];
-        
-        
-        [self.rtcmixManager parseScoreWithNSString:starts];
-        [self.rtcmixManager parseScoreWithNSString:variable];
-        [self.rtcmixManager parseScoreWithNSString:wind];
-        [self.rtcmixManager parseScoreWithNSString:range];
-        NSString *scorePath = [[NSBundle mainBundle] pathForResource:@"loop" ofType:@"sco"];
-        [self.rtcmixManager parseScoreWithFilePath:scorePath];
-    }];
-     */
     
 }
 
@@ -787,7 +664,7 @@ CLLocationCoordinate2D curCoord;
 
 - (void)mainLoop{
     //[self play:currentCity withAPI: weatherAPI];
-    currentTimer = [NSTimer scheduledTimerWithTimeInterval:30.0f target:self selector:@selector(runOnCurrentLoc: ) userInfo: nil repeats:YES];
+    currentTimer = [NSTimer scheduledTimerWithTimeInterval:45.0f target:self selector:@selector(runOnCurrentLoc: ) userInfo: nil repeats:YES];
     [currentTimer fire];
 }
 
@@ -817,6 +694,13 @@ CLLocationCoordinate2D curCoord;
 }
 
 
+- (void)maxError:(NSString *)error {
+    NSLog(@"maxError: %@", error);
+}
+
+- (void)maxMessage:(NSArray *)message {
+    NSLog(@"maxError: %@", message);
+}
 
 //Times of day
 //1am 6am 9am 12pm 4pm 7pm 10pm
@@ -850,4 +734,230 @@ CLLocationCoordinate2D curCoord;
 
 - (IBAction)OffButton:(id)sender {
 }
+
+
+
+
+
+/*
+ [weatherAPI currentWeatherByCityName:city withCallback:^(NSError *error, NSDictionary *result) {
+ if (error) {
+ // handle the error
+ NSLog(@"Error");
+ return;
+ }
+ // The data is ready
+ 
+ //Type of weather
+ NSNumber *currentID = result[@"weather"][0][@"id"];
+ int i = [[[currentID stringValue] substringToIndex: 1] intValue];
+ NSLog(@"ID is %d", i);
+ 
+ float chNum;
+ float cg;
+ float ci;
+ float cr;
+ float cf;
+ float cu;
+ float cm;
+ float cd;
+ float dg;
+ float di;
+ float dd;
+ float d1;
+ float d2;
+ float dvar;
+ float dspace;
+ float v;
+ 
+ 
+ chNum = 4;
+ dvar = 2;
+ dspace = .5;
+ v = 1;
+ cd = 7.0;
+ 
+ //normal
+ if(i == 8){
+ int k = [currentID intValue];
+ if(k == 800){
+ cg = 10;
+ ci = 6;
+ cr = 3;
+ cf = 600;
+ cu = 70;
+ cm = 5;
+ cd = 0;
+ dg = 8;
+ di = 6;
+ dd = 3;
+ d1 = 70;
+ d2 = 100;
+ v = 1;
+ 
+ }
+ else if (k > 802){
+ cg = 10;
+ ci = 6;
+ cr = 6;
+ cf = 600;
+ cu = 80;
+ cm = 5;
+ cd = 3;
+ dg = 7;
+ di = 6;
+ dd = 4.5;
+ d1 = 30;
+ d2 = 40;
+ v = 1;
+ 
+ } else{
+ cg = 4;
+ ci = 6;
+ cr = 3;
+ cf = 450;
+ cu = 70;
+ cm = 3;
+ cd = 10;
+ dg = 7;
+ di = 5;
+ dd = 8;
+ d1 = 60;
+ d2 = 80;
+ v = 2;
+ 
+ }
+ } else if(i == 5){
+ cg = 1;
+ ci = .7;
+ cr = 10;
+ cf = 600;
+ cu = 50;
+ cm = .6;
+ dg = 9;
+ di = 6;
+ dd = 8;
+ d1 = 10;
+ d2 = 20;
+ v = 3;
+ 
+ } else if(i == 2){
+ cg = .6;
+ ci = .4;
+ cr = 10;
+ cf = 600;
+ cu = 50;
+ cm = .3;
+ cd = 4;
+ dg = 10;
+ di = 7;
+ dd = 4;
+ d1 = 10;
+ d2 = 20;
+ v = 4;
+ 
+ } else if(i == 3){
+ cg = 2;
+ ci = 1;
+ cr = 10;
+ cf = 600;
+ cu = 50;
+ cm = .5;
+ cd = 5;
+ dg = 9;
+ di = 6;
+ dd = 8;
+ d1 = 10;
+ d2 = 20;
+ v = 2;
+ 
+ }
+ else if(i == 6){
+ cg = 8;
+ ci = 6;
+ cr = 5;
+ cf = 300;
+ cu = 40;
+ cm = 4;
+ dg = 7;
+ di = 5;
+ dd = 4;
+ d1 = 50;
+ d2 = 70;
+ v = 1;
+ 
+ }
+ //this currently includes both "extreme" and "other" due to not checking the second digit, must be changed
+ else if(i == 9){
+ cg = 10;
+ ci = 6;
+ cr = 20;
+ cf = 500;
+ cu = 70;
+ cm = 5;
+ dg = 7;
+ di = 5;
+ dd = 4;
+ d1 = 10;
+ d2 = 20;
+ 
+ } else{
+ cg = 10;
+ ci = 6;
+ cr = 20;
+ cf = 500;
+ cu = 70;
+ cm = 5;
+ dg = 7;
+ di = 5;
+ dd = 4;
+ d1 = 10;
+ d2 = 20;
+ }
+ //chimeGap = 5
+ //chimeInt = .5
+ //chimeRange = 10
+ //chimeFreq = 600
+ //chimeUp = 50
+ 
+ //droneGap = 7
+ //droneInt = 5
+ //droneDur = 4
+ //drone1 = 10
+ //drone2 = 20
+ 
+ di = dim;
+ dg = dgm;
+ 
+ NSLog(@"int %f", dim);
+ NSLog(@"gap %f", dgm);
+ 
+ NSString *starts = [NSString stringWithFormat: @"chimes=%f\nchimeGap = %f\nchimeInt = %f\nchimeRange = %f\nchimeFreq = %f\nchimeUp = %f\nchimeMin = %f\nchimeDur = %f\ndroneGap = %f\ndroneInt = %f\ndroneDur = %f\ndrone1 = %f\ndrone2 = %f\ndroneSub=%f\ndroneSpace=%f\nvoices = %f", chNum, cg, ci, cr, cf, cu, cm, cd, dg, di, dd, d1, d2, dvar, dspace, v];
+ 
+ 
+ NSNumber *currentTemp = result[@"main"][@"temp"];
+ float k = [currentTemp floatValue];
+ k = 250-k*8;
+ NSString *variable = [NSString stringWithFormat: @"droneFreq = %f", k];
+ NSLog(variable);
+ 
+ NSNumber *win = result[@"wind"][@"speed"];
+ float w = [win floatValue]*25;
+ NSString *wind = [NSString stringWithFormat: @"windamp = %f", w];
+ NSLog(wind);
+ 
+ NSNumber *currentHum = result[@"main"][@"humidity"];
+ float h = [currentHum floatValue]/10;
+ NSString *range = [NSString stringWithFormat: @"droneRange = %f", h];
+ 
+ 
+ [self.rtcmixManager parseScoreWithNSString:starts];
+ [self.rtcmixManager parseScoreWithNSString:variable];
+ [self.rtcmixManager parseScoreWithNSString:wind];
+ [self.rtcmixManager parseScoreWithNSString:range];
+ NSString *scorePath = [[NSBundle mainBundle] pathForResource:@"loop" ofType:@"sco"];
+ [self.rtcmixManager parseScoreWithFilePath:scorePath];
+ }];
+ */
+
 @end

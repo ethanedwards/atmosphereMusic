@@ -12,6 +12,7 @@
 		AAB1D6FE1C21A0C2000FA6E6 /* RTcmixPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = AAB1D6FD1C21A0C2000FA6E6 /* RTcmixPlayer.m */; };
 		AAB1D7001C21A0EE000FA6E6 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAB1D6FF1C21A0EE000FA6E6 /* AVFoundation.framework */; };
 		AAB1D7021C21A450000FA6E6 /* loop.sco in Resources */ = {isa = PBXBuildFile; fileRef = AAB1D7011C21A450000FA6E6 /* loop.sco */; };
+		AAD03B3C1C831100002D6A04 /* setup.sco in Resources */ = {isa = PBXBuildFile; fileRef = AAD03B3B1C831100002D6A04 /* setup.sco */; };
 		AAEAF11D1C1BEE90003695E5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AAEAF11C1C1BEE90003695E5 /* main.m */; };
 		AAEAF1201C1BEE90003695E5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AAEAF11F1C1BEE90003695E5 /* AppDelegate.m */; };
 		AAEAF1231C1BEE90003695E5 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AAEAF1221C1BEE90003695E5 /* ViewController.m */; };
@@ -42,6 +43,7 @@
 		AAB1D6FD1C21A0C2000FA6E6 /* RTcmixPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RTcmixPlayer.m; sourceTree = SOURCE_ROOT; };
 		AAB1D6FF1C21A0EE000FA6E6 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		AAB1D7011C21A450000FA6E6 /* loop.sco */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = loop.sco; sourceTree = "<group>"; };
+		AAD03B3B1C831100002D6A04 /* setup.sco */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = setup.sco; sourceTree = "<group>"; };
 		AAEAF1171C1BEE90003695E5 /* AmbientPod.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AmbientPod.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAEAF11B1C1BEE90003695E5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AAEAF11C1C1BEE90003695E5 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 				AAEAF1211C1BEE90003695E5 /* ViewController.h */,
 				AAEAF1221C1BEE90003695E5 /* ViewController.m */,
 				AAB1D7011C21A450000FA6E6 /* loop.sco */,
+				AAD03B3B1C831100002D6A04 /* setup.sco */,
 				AAEAF1241C1BEE90003695E5 /* Main.storyboard */,
 				AAEAF1271C1BEE90003695E5 /* Images.xcassets */,
 				AAEAF1291C1BEE90003695E5 /* LaunchScreen.xib */,
@@ -250,6 +253,7 @@
 				AAB1D7021C21A450000FA6E6 /* loop.sco in Resources */,
 				AAEAF12B1C1BEE90003695E5 /* LaunchScreen.xib in Resources */,
 				AAEAF1281C1BEE90003695E5 /* Images.xcassets in Resources */,
+				AAD03B3C1C831100002D6A04 /* setup.sco in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
