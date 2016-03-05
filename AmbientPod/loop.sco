@@ -102,7 +102,6 @@ for(k = 0; st < end; k = k + 1){
         freq = chimePitches[freqindex]
 
         MBANDEDWG(st, chimeDur, 20000*chimeAmp, freq, 0.5, 1, 0.9, 0, 0, 0.99, 0, 0.5)
-//should change to be random or procedural
         st = st + irand(chimeMin, chimeInt)
     }
 }

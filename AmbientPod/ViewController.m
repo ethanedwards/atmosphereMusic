@@ -75,8 +75,8 @@ CLLocationCoordinate2D curCoord;
 
 - (void)viewDidLoad {
         [super viewDidLoad];
-    //[self.UpdateButton removeFromSuperview];
-    //[self.cityName removeFromSuperview];
+    [self.UpdateButton removeFromSuperview];
+    [self.cityName removeFromSuperview];
 
     
     active = false;
@@ -345,6 +345,7 @@ CLLocationCoordinate2D curCoord;
         dv = 1;
         dr = 4;
         
+        i = 6;
         //normal
         if(i == 8){
             int k = [currentID intValue];
@@ -567,7 +568,7 @@ CLLocationCoordinate2D curCoord;
         
         NSNumber *currentHum = result[@"main"][@"humidity"];
         float h = [currentHum floatValue]/10;
-        
+        h = 5;
         dd = dd + h;
         NSString *envEnd = [NSString stringWithFormat: @"final = %f", h+16];
         
@@ -577,6 +578,7 @@ CLLocationCoordinate2D curCoord;
         
         NSNumber *currentTemp = result[@"main"][@"temp"];
         float k = [currentTemp floatValue];
+        k = 0;
         k = 600-k*16;
         NSString *variable = [NSString stringWithFormat: @"droneFreq = %f", k];
 //        NSLog(variable);
@@ -595,6 +597,7 @@ CLLocationCoordinate2D curCoord;
         
         NSNumber *pres = result[@"main"][@"pressure"];
         float p = [pres floatValue];
+        p = 990;
         p = 1013-p;
         if(p<0){
             p = 0;
